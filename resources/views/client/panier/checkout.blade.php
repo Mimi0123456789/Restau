@@ -121,7 +121,7 @@
                             type="text"
                             class="form-control"
                             value="{{ number_format($prixLivraisonDefaut, 2, ',', ' ') }} €"
-                            readonly
+                            readonly disabled
                         >
                     </div>
 
@@ -136,20 +136,6 @@
                         >
                         <label class="form-check-label" for="pret_materiel">
                             Prêt de matériel
-                        </label>
-                    </div>
-
-                    <div class="form-check mb-4">
-                        <input
-                            class="form-check-input"
-                            type="checkbox"
-                            name="restitution_materiel"
-                            value="1"
-                            id="restitution_materiel"
-                            {{ old('restitution_materiel') ? 'checked' : '' }}
-                        >
-                        <label class="form-check-label" for="restitution_materiel">
-                            Matériel restitué
                         </label>
                     </div>
 

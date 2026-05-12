@@ -2,51 +2,31 @@
 
 namespace App\Mail;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class EmployeCreatedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct()
-    {
-        //
-    }
+    public User $employe;
+    public string $password;
 
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
+    public function __construct(User $employe, string $password)
     {
-        return new Envelope(
-            subject: 'Employe Created Mail',
-        );
-    }
-
-    /*public function content(): Content
-    {
-        return new Content(
-            view: 'emails.employe-created',
-        );
-    }*/
-
-    public function attachments(): array
-    {
-        return [];
+        $this->employe = $employe;
+        $this->password = $password;
     }
 
     public function build()
     {
         return $this->subject('Création de votre compte employé')
-            ->view('emails.employe-created');
+            ->view('emails.employe-created')
+            ->with([
+                'employe' => $this->employe,
+                'password' => $this->password,
+            ]);
     }
-
 }

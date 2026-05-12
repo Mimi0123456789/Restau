@@ -76,6 +76,9 @@
                     </div>
                     <div class="card-body p-0">
                         @if($grafanaUrl)
+                        <p class="text-muted">
+    URL Grafana : {{ $grafanaUrl }}
+</p>
                             <iframe
                                 src="{{ $grafanaUrl }}"
                                 width="100%"
@@ -89,25 +92,6 @@
                                 Renseigne <code>GRAFANA_URL</code> et <code>GRAFANA_DASHBOARD_UID</code> dans le fichier <code>.env</code>.
                             </div>
                         @endif
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header fw-bold">
-                        Notes d’intégration
-                    </div>
-                    <div class="card-body">
-                        <p class="mb-2">
-                            Cette page est conçue pour afficher un dashboard Grafana alimenté par une base non relationnelle.
-                        </p>
-                        <ul class="mb-0">
-                            <li>comparaison du nombre de commandes par menu</li>
-                            <li>suivi du chiffre d’affaires par menu</li>
-                            <li>filtrage sur une période donnée</li>
-                            <li>filtrage sur un menu spécifique</li>
-                        </ul>
                     </div>
                 </div>
             </div>

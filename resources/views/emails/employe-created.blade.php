@@ -1,3 +1,9 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Création de compte</title>
+</head>
 <p>Bonjour,</p>
 
 <p>Un compte employé a été créé pour vous.</p>
@@ -8,3 +14,5 @@
 </p>
 
 <p>Merci de contacter l’administrateur pour l’obtenir.</p>
+
+</html>

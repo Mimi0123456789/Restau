@@ -70,7 +70,7 @@ class EmployeController extends Controller
         ]);
 
         Mail::to($employe->email)->send(
-            new EmployeCreatedMail($employe)
+            new EmployeCreatedMail($employe, $password)
         );
 
         return redirect()
