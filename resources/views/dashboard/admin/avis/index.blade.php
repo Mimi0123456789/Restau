@@ -52,7 +52,7 @@
                                         {{ $a->commande?->user?->prenom }} {{ $a->commande?->user?->nom }}
                                     </td>
                                     <td>{{ $a->note }}/5</td>
-                                    <td>{{ $a->description ?: '—' }}</td>
+                                    <td>{{ $a->commentaire ?: '—' }}</td>
                                     <td>
                                         @if($a->statut === 'valide')
                                             <span class="badge bg-success">Validé</span>

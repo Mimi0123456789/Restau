@@ -123,8 +123,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea name="description" class="form-control" rows="4">{{ old('description', optional($commande->avis)->description) }}</textarea>
+                        <label class="form-label">Commentaire</label>
+                        <textarea name="commentaire" class="form-control" rows="4">{{ old('commentaire', optional($commande->avis)->commentaire) }}</textarea>
                     </div>
 
                     <button class="btn btn-primary">Envoyer mon avis</button>

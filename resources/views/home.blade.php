@@ -288,7 +288,7 @@
                             </div>
 
                             <p class="text-gray-600">
-                                {{ $unAvis->description }}
+                                {{ $unAvis->commentaire }}
                             </p>
                         </div>
                     @empty

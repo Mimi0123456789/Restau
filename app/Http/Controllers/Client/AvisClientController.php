@@ -21,21 +21,25 @@ class AvisClientController extends Controller
                 ]);
         }
 
+        if ($commande->avis()->exists()) {
+            return redirect()
+                ->route('client.commandes.show', $commande)
+                ->withErrors([
+                    'avis' => 'Vous avez déjà déposé un avis pour cette commande.',
+                ]);
+        }
+
         $validated = $request->validate([
             'note' => ['required', 'integer', 'between:1,5'],
-            'description' => ['nullable', 'string', 'max:1000'],
+            'commentaire' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        Avis::updateOrCreate(
-            [
-                'commande_id' => $commande->id,
-            ],
-            [
-                'note' => $validated['note'],
-                'description' => $validated['description'] ?? null,
-                'statut' => 'en attente',
-            ]
-        );
+        Avis::create([
+            'commande_id' => $commande->id,
+            'note' => $validated['note'],
+            'commentaire' => $validated['commentaire'] ?? null,
+            'statut' => 'en attente',
+        ]);
 
         return redirect()
             ->route('client.commandes.show', $commande)

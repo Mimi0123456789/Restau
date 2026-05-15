@@ -69,32 +69,58 @@
         </div>
 
         <div class="row g-4">
-            <div class="col-12">
+            <div class="col-lg-6">
                 <div class="card shadow-sm">
-                    <div class="card-header fw-bold">
-                        Nombre de commandes par menu
+                    <div class="card-header fw-bold">Commandes par menu</div>
+                    <div class="card-body">
+                        <div id="commandesParMenuChart"></div>
                     </div>
-                    <div class="card-body p-0">
-                        @if($grafanaUrl)
-                        <p class="text-muted">
-    URL Grafana : {{ $grafanaUrl }}
-</p>
-                            <iframe
-                                src="{{ $grafanaUrl }}"
-                                width="100%"
-                                height="520"
-                                frameborder="0"
-                                class="rounded-bottom"
-                            ></iframe>
-                        @else
-                            <div class="p-4 text-muted">
-                                Grafana n’est pas encore configuré.  
-                                Renseigne <code>GRAFANA_URL</code> et <code>GRAFANA_DASHBOARD_UID</code> dans le fichier <code>.env</code>.
-                            </div>
-                        @endif
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold">Chiffre d’affaires par menu</div>
+                    <div class="card-body">
+                        <div id="caParMenuChart"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+    const commandesParMenuLabels = @json($commandesParMenuLabels);
+    const commandesParMenuData = @json($commandesParMenuData);
+
+    const caParMenuLabels = @json($caParMenuLabels);
+    const caParMenuData = @json($caParMenuData);
+
+    new ApexCharts(document.querySelector("#commandesParMenuChart"), {
+        chart: {
+            type: 'bar',
+            height: 350
+        },
+        series: [{
+            name: 'Commandes',
+            data: commandesParMenuData
+        }],
+        xaxis: {
+            categories: commandesParMenuLabels
+        }
+    }).render();
+
+    new ApexCharts(document.querySelector("#caParMenuChart"), {
+        chart: {
+            type: 'donut',
+            height: 350
+        },
+        labels: caParMenuLabels,
+        series: caParMenuData
+    }).render();
+</script>
+@endpush

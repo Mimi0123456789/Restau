@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ConfirmationCommandeMail;
 use App\Models\Commande;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+
 
 class CommandeClientController extends Controller
 {
@@ -55,20 +58,28 @@ class CommandeClientController extends Controller
         }
 
         $validated = $request->validate([
-            'date_prestation' => 'required|date|after_or_equal:today',
-            'heure_livraison' => 'required|date_format:H:i',
-            'nombre_personne' => 'required|integer|min:1',
-            'pret_materiel' => 'nullable|boolean',
-            'restitution_materiel' => 'nullable|boolean',
+            'date_prestation' => ['required', 'date', 'after_or_equal:today'],
+            'heure_livraison' => ['required', 'date_format:H:i'],
+            'nombre_personne' => ['required', 'integer', 'min:1'],
+            'pret_materiel' => ['nullable', 'boolean'],
+            'restitution_materiel' => ['nullable', 'boolean'],
+        ], [
+            'date_prestation.after_or_equal' => 'La date de prestation doit être aujourd’hui ou une date future.',
+            'heure_livraison.date_format' => 'L’heure de livraison doit être au format HH:MM.',
         ]);
 
         $commande->update([
             'date_prestation' => $validated['date_prestation'],
-            'heure_livraison' => $validated['heure_livraison'],
+            'heure_livraison' => $validated['heure_livraison'] . ':00',
             'nombre_personne' => $validated['nombre_personne'],
             'pret_materiel' => $request->boolean('pret_materiel'),
             'restitution_materiel' => $request->boolean('restitution_materiel'),
         ]);
+
+        $commande->load(['user', 'menus']);
+
+        Mail::to($commande->user->email)
+            ->send(new ConfirmationCommandeMail($commande, 'modification'));
 
         return redirect()
             ->route('client.commandes.show', $commande)

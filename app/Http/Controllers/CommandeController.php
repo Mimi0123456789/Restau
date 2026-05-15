@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ConfirmationCommandeMail;
 use App\Models\Commande;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\DemandeAvisMail;
 
 class CommandeController extends Controller
 {
@@ -31,8 +34,8 @@ class CommandeController extends Controller
 
             $query->whereHas('user', function ($q) use ($client) {
                 $q->where('nom', 'like', "%{$client}%")
-                  ->orWhere('prenom', 'like', "%{$client}%")
-                  ->orWhere('email', 'like', "%{$client}%");
+                    ->orWhere('prenom', 'like', "%{$client}%")
+                    ->orWhere('email', 'like', "%{$client}%");
             });
         }
 
@@ -64,12 +67,20 @@ class CommandeController extends Controller
             $commande->update([
                 'statut' => $validated['statut'],
             ]);
-            app(\App\Services\StatsExportService::class)
-            ->exportCommande($commande->fresh());
 
             $commande->statuts()->create([
                 'statut' => $validated['statut'],
             ]);
+
+            $commande->load(['user', 'menus']);
+
+            Mail::to($commande->user->email)
+                ->send(new ConfirmationCommandeMail($commande, 'statut'));
+        }
+
+        if ($validated['statut'] === 'Terminée') {
+            Mail::to($commande->user->email)
+                ->send(new DemandeAvisMail($commande));
         }
 
         return redirect()

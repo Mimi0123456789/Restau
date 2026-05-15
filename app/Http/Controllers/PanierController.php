@@ -7,6 +7,8 @@ use App\Models\Commande;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Mail\ConfirmationCommandeMail;
+use Illuminate\Support\Facades\Mail;
 
 class PanierController extends Controller
 {
@@ -161,26 +163,11 @@ class PanierController extends Controller
                 'nombre_personne' => $validated['nombre_personne'],
                 'prix_livraison' => $prixLivraison,
                 'statut' => 'En attente',
-                'pret_materiel' => request()->boolean('pret_materiel'),
-                'restitution_materiel' => request()->boolean('restitution_materiel'),
+                'pret_materiel' => $validated['pret_materiel'] ?? false,
+                'restitution_materiel' => $validated['restitution_materiel'] ?? false,
             ]);
 
             $commande->menus()->sync($syncData);
-
-            app(\App\Services\StatsExportService::class)->exportCommande($commande);
-
-            $commande = Commande::create([
-                'user_id' => $user->id,
-                'date_commande' => Carbon::today(),
-                'date_prestation' => $validated['date_prestation'],
-                'heure_livraison' => $validated['heure_livraison'],
-                'prix_menu' => $totalMenus,
-                'nombre_personne' => $validated['nombre_personne'],
-                'prix_livraison' => $prixLivraison,
-                'statut' => 'En attente',
-                'pret_materiel' => request()->boolean('pret_materiel'),
-                'restitution_materiel' => request()->boolean('restitution_materiel'),
-            ]);
 
             $commande->statuts()->create([
                 'statut' => 'En attente',
@@ -194,10 +181,14 @@ class PanierController extends Controller
                 }
             }
 
+            $commande->load(['user', 'menus']);
+
+            Mail::to($commande->user->email)
+                ->send(new ConfirmationCommandeMail($commande, 'creation'));
+
             session()->forget('panier');
             session()->flash('commande_id', $commande->id);
         });
-
         return redirect()
             ->route('client.commandes.show', session('commande_id'))
             ->with('ok', 'Votre commande a bien été créée.');

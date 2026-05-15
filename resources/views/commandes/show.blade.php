@@ -74,7 +74,7 @@
                         <div class="card-header fw-bold">Avis client</div>
                         <div class="card-body">
                             <p><strong>Note :</strong> {{ $commande->avis->note }}/5</p>
-                            <p><strong>Description :</strong> {{ $commande->avis->description ?: '—' }}</p>
+                            <p><strong>Description :</strong> {{ $commande->avis->commentaire ?: '—' }}</p>
                             <p><strong>Statut avis :</strong> {{ $commande->avis->statut }}</p>
                         </div>
                     </div>

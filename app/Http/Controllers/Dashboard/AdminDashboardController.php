@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminDashboardController extends Controller
 {
@@ -21,41 +22,54 @@ class AdminDashboardController extends Controller
         $dateDebut = $request->get('date_debut');
         $dateFin = $request->get('date_fin');
 
-        $grafanaBaseUrl = config('services.grafana.url');
-        $grafanaDashboardUid = config('services.grafana.dashboard_uid');
+        $query = DB::table('commande_menu')
+            ->join('menus', 'menus.id', '=', 'commande_menu.menu_id')
+            ->join('commandes', 'commandes.id', '=', 'commande_menu.commande_id');
 
-        $query = [];
-
-        if ($dateDebut) {
-            $query['from'] = strtotime($dateDebut . ' 00:00:00') * 1000;
+        if (!empty($menuId)) {
+            $query->where('menus.id', $menuId);
         }
 
-        if ($dateFin) {
-            $query['to'] = strtotime($dateFin . ' 23:59:59') * 1000;
+        if (!empty($dateDebut)) {
+            $query->whereDate('commandes.date_commande', '>=', $dateDebut);
         }
 
-        if ($menuId) {
-            $query['var-menu_id'] = $menuId;
+        if (!empty($dateFin)) {
+            $query->whereDate('commandes.date_commande', '<=', $dateFin);
         }
 
-        $grafanaUrl = null;
+        $statsMenus = $query
+            ->select(
+                'menus.id',
+                'menus.titre',
+                DB::raw('COUNT(DISTINCT commandes.id) as total_commandes'),
+                DB::raw('SUM(commande_menu.quantite) as total_quantite'),
+                DB::raw('SUM(commande_menu.prix_total) as chiffre_affaires')
+            )
+            ->groupBy('menus.id', 'menus.titre')
+            ->orderByDesc('total_commandes')
+            ->get();
 
-        if ($grafanaBaseUrl && $grafanaDashboardUid) {
-            $grafanaUrl = rtrim($grafanaBaseUrl, '/')
-                . '/d/' . $grafanaDashboardUid . '/comptabilite-statistiques'
-                . '?orgId=1&kiosk=tv';
+        return view('dashboard.admin.statistiques', [
+            'menus' => $menus,
+            'menuId' => $menuId,
+            'dateDebut' => $dateDebut,
+            'dateFin' => $dateFin,
 
-            if (!empty($query)) {
-                $grafanaUrl .= '&' . http_build_query($query);
-            }
-        }
+            'statsMenus' => $statsMenus,
 
-        return view('dashboard.admin.statistiques', compact(
-            'menus',
-            'menuId',
-            'dateDebut',
-            'dateFin',
-            'grafanaUrl'
-        ));
+            'totalCommandes' => $statsMenus->sum('total_commandes'),
+            'totalQuantite' => $statsMenus->sum('total_quantite'),
+            'totalChiffreAffaires' => $statsMenus->sum('chiffre_affaires'),
+
+            'commandesParMenuLabels' => $statsMenus->pluck('titre')->values(),
+            'commandesParMenuData' => $statsMenus->pluck('total_commandes')->map(fn ($v) => (int) $v)->values(),
+
+            'quantitesParMenuLabels' => $statsMenus->pluck('titre')->values(),
+            'quantitesParMenuData' => $statsMenus->pluck('total_quantite')->map(fn ($v) => (int) $v)->values(),
+
+            'caParMenuLabels' => $statsMenus->pluck('titre')->values(),
+            'caParMenuData' => $statsMenus->pluck('chiffre_affaires')->map(fn ($v) => round((float) $v, 2))->values(),
+        ]);
     }
 }
