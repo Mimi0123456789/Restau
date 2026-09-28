@@ -17,7 +17,7 @@ class UserFactory extends Factory
             'prenom' => fake()->firstName(),
             'nom' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
-            'password' => Hash::make('password'),
+            'password' => Hash::make('Password123!'),
             'telephone' => fake()->numerify('0#########'),
             'ville' => fake()->city(),
             'code_postal' => fake()->postcode(),

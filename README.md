@@ -1,59 +1,389 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## Vite & Gourmand — Application Web de Gestion de Menus et Commandes
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Présentation du projet
 
-## About Laravel
+**Vite & Gourmand** est une application web développée afin d'augmenter la visibilité et l'accessibilité de l'entreprise.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+L’objectif principal de cet applicatif est de permettre de :
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+* consulter les menus ;
+* gérer ses commandes ;
+* administrer les menus et es plats ;
+* gérer les employés ;
+* suivre les commandes ;
+* gérer les avis clients ;
+* consulter des statistiques.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Le projet a été développé avec :
 
-## Learning Laravel
+* **Laravel 11**
+* **PHP 8.2**
+* **MariaDB**
+* **Laravel Breeze** pour l’authentification
+* **Vite** pour la gestion des assets frontend
+* **TailwindCSS** pour l’interface utilisateur
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# Choix techniques et justification
 
-## Laravel Sponsors
+## Laravel 11
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Le framework Laravel 11 a été choisi car :
 
-### Premium Partners
+### Avantages
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+* architecture MVC ;
+* système de routing ;
+* ORM Eloquent ;
+* migrations facilitant les versions de base de données ;
+* gestion native des mails ;
+* système d’authentification ;
+* middleware permettant la sécurisation des routes ;
+* bonne documentation ;
+* rapidité de développement.
 
-## Contributing
+Laravel est adapté à une application CRUD comme celle-ci, en particulier pour :
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+* la gestion des menus ;
+* les commandes ;
+* les employés ;
+* les différents paramètres (allergènes, thèmes...) ;
+* les avis clients.
 
-## Code of Conduct
+### Inconvénients
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+* framework relativement lourd ;
+* nécessite une bonne compréhension des conventions Laravel.
 
-## Security Vulnerabilities
+## MariaDB
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+MariaDB a été utilisé comme système de gestion de base de données relationnelle.
 
-## License
+### Avantages
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+* simple à mettre en place ;
+* bonne compatibilité avec Laravel ;
+* performances adaptées aux applications web ;
+* bonne gestion des relations entre données ;
+* solution open source.
+
+La structure relationnelle était particulièrement adaptée pour gérer :
+
+* les utilisateurs ;
+* les rôles ;
+* les menus ;
+* les plats ;
+* les allergènes ;
+* les commandes ;
+* les avis.
+
+### Inconvénients
+
+* moins performant que PostgreSQL pour certaines requêtes complexes ;
+* fonctionnalités analytiques plus limitées ;
+* gestion JSON moins avancée.
+
+---
+
+# Architecture du projet
+
+Le projet suit l’architecture MVC de Laravel.
+
+## Structure principale
+
+```bash
+app/
+ ├── Http/
+ │    ├── Controllers/
+ │    ├── Middleware/
+ │
+ ├── Models/
+ │
+resources/
+ ├── views/
+ │
+routes/
+ ├── web.php
+ │
+database/
+ ├── migrations/
+ ├── seeders/
+```
+
+---
+
+# Gestion des rôles
+
+L’application possède plusieurs rôles :
+
+| Rôle           | Description                          |
+| -------------- | ------------------------------------ |
+| Administrateur | Gestion complète de l’application    |
+| Employé        | Gestion des menus, commandes et avis |
+| Client         | Consultation et commandes            |
+
+Les accès sont sécurisés via des middlewares Laravel.
+
+---
+
+# Authentification et sécurité
+
+L’authentification repose sur Laravel Breeze.
+
+Fonctionnalités mises en place :
+
+* inscription ;
+* connexion ;
+* réinitialisation du mot de passe ;
+* protection CSRF ;
+* hash des mots de passe ;
+* contrôle des rôles ;
+* middleware de sécurité.
+
+---
+
+# 🍽️ Fonctionnalités principales
+
+## Visiteur
+
+* consultation des menus ;
+* filtrage dynamique ;
+* consultation des avis ;
+* formulaire de contact ;
+* création de compte.
+
+## Client
+
+* commande de menus ;
+* panier ;
+* suivi des commandes ;
+* annulation/modification ;
+* dépôt d’avis.
+
+## Employé
+
+* gestion des menus ;
+* gestion des plats ;
+* gestion des commandes ;
+* validation des avis.
+
+## Administrateur
+
+* gestion des employés ;
+* statistiques ;
+* paramètres globaux ;
+* gestion complète de l’application.
+
+---
+
+# Installation du projet
+
+## 1. Cloner le projet
+
+```bash
+git clone Mimi0123456789/Restau
+cd Restau
+```
+
+---
+
+## 2. Installer les dépendances PHP
+
+```bash
+composer install
+```
+
+---
+
+## 3. Installer les dépendances Node.js
+
+```bash
+npm install
+```
+
+---
+
+## 4. Configurer l’environnement
+
+Créer le fichier `.env` :
+
+```bash
+cp .env.example .env
+```
+
+Configurer :
+
+```env
+APP_NAME="Vite & Gourmand"
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://127.0.0.1:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=restau
+DB_USERNAME=root
+DB_PASSWORD=
+
+MONGODB_URI=mongodb://127.0.0.1:27017
+MONGODB_DATABASE=restau_stats
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="noreply@restau.fr"
+MAIL_FROM_NAME="Vite & Gourmand"
+```
+
+---
+
+## 5. Générer la clé Laravel
+
+```bash
+php artisan key:generate
+```
+
+---
+
+## 6. Lancer les migrations
+
+```bash
+php artisan migrate
+```
+
+---
+
+## 7. Lancer les seeders
+
+```bash
+php artisan db:seed
+```
+
+---
+
+## 8. Compiler les assets frontend
+
+```bash
+npm run dev
+```
+
+ou
+
+```bash
+npm run build
+```
+
+---
+
+## 9. Démarrer le serveur
+
+```bash
+php artisan serve
+```
+
+Application disponible sur :
+
+```bash
+http://127.0.0.1:8000
+```
+
+---
+
+# Tests
+
+Lancer les tests Laravel :
+
+```bash
+php artisan test
+```
+
+---
+
+# Gestion des mails
+
+Les mails sont utilisés pour :
+
+* confirmation de commande ;
+* création de compte ;
+* réinitialisation de mot de passe ;
+* notifications de commandes ;
+* notifications de retour de matériel.
+
+---
+
+# Statistiques
+
+Les statistiques administrateur permettent :
+
+* le calcul du chiffre d’affaires ;
+* le nombre de commandes par menu ;
+* l’affichage graphique des données.
+
+MongoDB est utilisé pour cette partie analytique.
+
+---
+
+# Accessibilité
+
+Le projet tente de respecter les recommandations RGAA :
+
+* structure HTML sémantique ;
+* contrastes ;
+* formulaires accessibles ;
+* labels associés aux champs ;
+* navigation clavier.
+
+---
+
+# RGPD et sécurité
+
+Le projet prend en compte plusieurs éléments RGPD :
+
+* stockage sécurisé des mots de passe ;
+* limitation des accès ;
+* gestion des rôles ;
+* protection des données utilisateurs ;
+* validation des formulaires.
+
+---
+
+# Déploiement
+
+Le projet peut être déployé sur :
+
+* Apache ;
+* Nginx ;
+* serveur Linux.
+
+Configuration recommandée :
+
+* PHP 8.2+
+* MariaDB 10+
+* Composer
+* Node.js
+
+---
+
+# Perspectives d’amélioration
+
+Améliorations possibles :
+
+* paiement en ligne ;
+* génération de factures PDF ;
+* notifications temps réel ;
+* suivi des stocks ;
+* application mobile ;
+* optimisation RGAA ;
+* dashboard statistiques avancé.
+
+---
+
+# Auteur
+
+Projet développé dans le cadre de la formation **Développeur web Full-stack** avec l'organisme STUDI.
