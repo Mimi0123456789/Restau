@@ -1,10 +1,20 @@
+```php
 <?php
 
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+
 use App\Models\{
-    User, Role, Regime, Allergene, Plat, Menu, Commande, Theme
+    User,
+    Role,
+    Regime,
+    Allergene,
+    Plat,
+    Menu,
+    Commande,
+    Theme
 };
 
 class DatabaseSeeder extends Seeder
@@ -13,34 +23,39 @@ class DatabaseSeeder extends Seeder
     {
         /*
         |--------------------------------------------------------------------------
-        | Roles
+        | Rôles
         |--------------------------------------------------------------------------
         */
-        $adminRole = Role::create(['libelle' => 'admin']);
-        $clientRole = Role::create(['libelle' => 'client']);
-        $employeRole = Role::create(['libelle' => 'employe']);
 
-        $adminRoleId = $adminRole->getKey();
-        $clientRoleId = $clientRole->getKey();
-        $employeRoleId = $employeRole->getKey();
+        $adminRole = Role::updateOrCreate(
+            ['id' => 1],
+            ['libelle' => 'admin']
+        );
+
+        $clientRole = Role::updateOrCreate(
+            ['id' => 2],
+            ['libelle' => 'client']
+        );
+
+        $employeRole = Role::updateOrCreate(
+            ['id' => 3],
+            ['libelle' => 'employe']
+        );
 
         /*
         |--------------------------------------------------------------------------
-        | Users
+        | Administrateur
         |--------------------------------------------------------------------------
+        |
+        | Aucun utilisateur fictif n'est généré avec une Factory.
+        | On crée uniquement le compte administrateur nécessaire.
+        |
         */
-        User::factory(10)->create([
-            'role_id' => $clientRoleId,
-        ]);
 
-        User::factory(5)->create([
-            'role_id' => $employeRoleId,
-        ]);
-
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin@test.com'],
             [
-                'password' => bcrypt('password'),
+                'password' => Hash::make('Password123!'),
                 'prenom' => 'Admin',
                 'nom' => 'Super',
                 'telephone' => null,
@@ -48,7 +63,8 @@ class DatabaseSeeder extends Seeder
                 'code_postal' => null,
                 'pays' => 'France',
                 'adresse_postale' => null,
-                'role_id' => $adminRoleId,
+                'role_id' => $adminRole->id,
+                'is_active' => true,
             ]
         );
 
@@ -57,17 +73,37 @@ class DatabaseSeeder extends Seeder
         | Régimes
         |--------------------------------------------------------------------------
         */
-        foreach (['Classique', 'Végétarien', 'Vegan', 'Sans gluten'] as $libelle) {
-            Regime::create(['libelle' => $libelle]);
+
+        $regimes = [
+            'Classique',
+            'Végétarien',
+            'Vegan',
+            'Sans gluten',
+        ];
+
+        foreach ($regimes as $libelle) {
+            Regime::firstOrCreate([
+                'libelle' => $libelle,
+            ]);
         }
 
         /*
         |--------------------------------------------------------------------------
-        | Thème
+        | Thèmes
         |--------------------------------------------------------------------------
         */
-        foreach (['Pâques', 'Noël', 'Baptême', 'Mariage'] as $libelle) {
-            Theme::create(['libelle' => $libelle]);
+
+        $themes = [
+            'Pâques',
+            'Noël',
+            'Baptême',
+            'Mariage',
+        ];
+
+        foreach ($themes as $libelle) {
+            Theme::firstOrCreate([
+                'libelle' => $libelle,
+            ]);
         }
 
         /*
@@ -75,63 +111,44 @@ class DatabaseSeeder extends Seeder
         | Allergènes
         |--------------------------------------------------------------------------
         */
-        foreach (['Gluten', 'Lactose', 'Arachide', 'Oeuf', 'Poisson'] as $libelle) {
-            Allergene::create(['libelle' => $libelle]);
+
+        $allergenes = [
+            'Gluten',
+            'Lactose',
+            'Arachide',
+            'Oeuf',
+            'Poisson',
+        ];
+
+        foreach ($allergenes as $libelle) {
+            Allergene::firstOrCreate([
+                'libelle' => $libelle,
+            ]);
         }
 
         /*
         |--------------------------------------------------------------------------
-        | Plats
+        | Données métier
         |--------------------------------------------------------------------------
+        |
+        | Les anciennes lignes utilisant :
+        |
+        | Plat::factory(...)
+        | Menu::factory(...)
+        | Commande::factory(...)
+        |
+        | ont volontairement été supprimées.
+        |
+        | Les factories dépendent généralement de Faker, qui n'est pas installé
+        | dans l'environnement de production Heroku.
+        |
+        | Les plats, menus et commandes seront créés depuis l'application ou
+        | pourront être ajoutés plus tard avec des données réelles.
+        |
         */
-        $plats = Plat::factory(15)->create();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Menus
-        |--------------------------------------------------------------------------
-        */
-        $regimeIds = Regime::pluck('id')->toArray();
-        $themeIds = Theme::pluck('id')->toArray();
-
-        $menus = Menu::factory(6)->create([
-            'regime_id' => collect($regimeIds)->random(),
-            'theme_id' => collect($themeIds)->random(),
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Relations menus ↔ plats
-        |--------------------------------------------------------------------------
-        */
-        foreach ($menus as $menu) {
-            $menu->plats()->attach(
-                $plats->random(rand(2, 5))->pluck('id')->toArray()
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Relations plats ↔ allergènes
-        |--------------------------------------------------------------------------
-        */
-        $allergenesIds = Allergene::pluck('id')->toArray();
-
-        foreach ($plats as $plat) {
-            $plat->allergenes()->attach(
-                collect($allergenesIds)->random(rand(0, 3))
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Commandes
-        |--------------------------------------------------------------------------
-        */
-        $userIds = User::pluck('id')->toArray();
-
-        Commande::factory(20)->create([
-            'user_id' => collect($userIds)->random(),
-        ]);
+        $this->command->info('Base de données initialisée avec succès.');
+        $this->command->info('Rôles, administrateur, régimes, thèmes et allergènes créés.');
     }
 }
+```
