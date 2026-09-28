@@ -1,4 +1,3 @@
-```php
 <?php
 
 namespace Database\Seeders;
@@ -151,4 +150,3 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Rôles, administrateur, régimes, thèmes et allergènes créés.');
     }
 }
-```
