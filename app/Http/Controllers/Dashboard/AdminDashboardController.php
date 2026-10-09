@@ -19,14 +19,15 @@ class AdminDashboardController extends Controller
     {
         $menus = Menu::orderBy('titre')->get();
 
-        $menuId = $request->get('menu_id');
+        $menuIds = $request->input('menu_ids', []);
+        $menuIds = is_array($menuIds) ? array_filter(array_map('intval', $menuIds)) : [];
         $dateDebut = $request->get('date_debut');
         $dateFin = $request->get('date_fin');
 
         $commandesQuery = Commande::with(['user', 'menus'])
-            ->when($menuId, function ($query) use ($menuId) {
-                $query->whereHas('menus', function ($q) use ($menuId) {
-                    $q->where('menus.id', $menuId);
+            ->when(!empty($menuIds), function ($query) use ($menuIds) {
+                $query->whereHas('menus', function ($q) use ($menuIds) {
+                    $q->whereIn('menus.id', $menuIds);
                 });
             })
             ->when($dateDebut, function ($query) use ($dateDebut) {
@@ -40,8 +41,8 @@ class AdminDashboardController extends Controller
             ->join('menus', 'menus.id', '=', 'commande_menu.menu_id')
             ->join('commandes', 'commandes.id', '=', 'commande_menu.commande_id');
 
-        if (!empty($menuId)) {
-            $query->where('menus.id', $menuId);
+        if (!empty($menuIds)) {
+            $query->whereIn('menus.id', $menuIds);
         }
 
         if (!empty($dateDebut)) {
@@ -95,7 +96,7 @@ class AdminDashboardController extends Controller
 
         return view('dashboard.admin.statistiques', [
             'menus' => $menus,
-            'menuId' => $menuId,
+            'menuIds' => $menuIds,
             'dateDebut' => $dateDebut,
             'dateFin' => $dateFin,
             'statsMenus' => $statsMenus,

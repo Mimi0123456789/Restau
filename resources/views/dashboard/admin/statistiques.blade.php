@@ -19,7 +19,7 @@
             <div class="text-muted small">
                 Période :
                 @if($dateDebut || $dateFin)
-                    {{ $dateDebut ?: 'début' }} → {{ $dateFin ?: 'aujourd’hui' }}
+                    {{ $dateDebut ? \Carbon\Carbon::parse($dateDebut)->translatedFormat('d/m/Y') : 'début' }} → {{ $dateFin ? \Carbon\Carbon::parse($dateFin)->translatedFormat('d/m/Y') : 'aujourd’hui' }}
                 @else
                     tous les résultats
                 @endif
@@ -34,15 +34,15 @@
             <div class="card-body">
                 <form method="GET" action="{{ route('admin.statistiques') }}" class="row g-3 align-items-end">
                     <div class="col-md-4">
-                        <label for="menu_id" class="form-label">Filtrer par menu</label>
-                        <select name="menu_id" id="menu_id" class="form-select">
-                            <option value="">Tous les menus</option>
+                        <label for="menu_ids" class="form-label">Filtrer par menus</label>
+                        <select name="menu_ids[]" id="menu_ids" class="form-select" multiple size="6">
                             @foreach($menus as $menu)
-                                <option value="{{ $menu->id }}" @selected((string)$menuId === (string)$menu->id)>
+                                <option value="{{ $menu->id }}" @selected(in_array($menu->id, $menuIds ?? [], true))>
                                     {{ $menu->titre }}
                                 </option>
                             @endforeach
                         </select>
+                        <small class="text-muted">Maintenez Ctrl/Cmd pour sélectionner plusieurs menus.</small>
                     </div>
 
                     <div class="col-md-3">
