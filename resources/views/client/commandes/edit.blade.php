@@ -61,6 +61,20 @@
                     >
                 </div>
 
+                @foreach($commande->menus as $menu)
+                    <div class="mb-3">
+                        <label class="form-label">Quantité - {{ $menu->titre }}</label>
+                        <input
+                            type="number"
+                            name="quantites[{{ $menu->id }}]"
+                            class="form-control"
+                            value="{{ old('quantites.' . $menu->id, $menu->pivot->quantite) }}"
+                            min="{{ $menu->nombre_personne_minimum }}"
+                            required
+                        >
+                    </div>
+                @endforeach
+
                 <div class="form-check mb-2">
                     <input
                         class="form-check-input"
@@ -90,7 +104,7 @@
                 </div>
 
                 <div class="alert alert-info">
-                    Le choix du menu n’est pas modifiable.
+                    Les quantités peuvent être ajustées sans modifier la liste des menus commandés.
                 </div>
 
                 <button class="btn btn-primary">Enregistrer les modifications</button>
