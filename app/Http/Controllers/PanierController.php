@@ -178,7 +178,7 @@ class PanierController extends Controller
         foreach ($menus as $menu) {
             $quantite = $panier[$menu->id]['quantite'] ?? 1;
 
-            $prixUnitaire = round($menu->prix_par_personne * $validated['nombre_personne'], 2);
+            $prixUnitaire = round($menu->prix_par_personne, 2);
 
             if ($validated['nombre_personne'] >= ($menu->nombre_personne_minimum + 5)) {
                 $prixUnitaire = round($prixUnitaire * 0.90, 2);
