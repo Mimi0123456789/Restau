@@ -3,6 +3,10 @@
 @section('title', 'Détail commande')
 
 @section('content')
+    @php
+        $prixMenusTotal = $commande->menus->sum(fn ($menu) => (float) ($menu->pivot->prix_total ?? 0));
+    @endphp
+
     <div class="max-w-5xl mx-auto px-6 py-12">
         <div class="mb-4">
             <a href="{{ route('client.commandes.index') }}" class="btn btn-outline-secondary">
@@ -33,9 +37,9 @@
                 <p><strong>Date prestation :</strong> {{ $commande->date_prestation?->format('d/m/Y') }}</p>
                 <p><strong>Heure livraison :</strong> {{ $commande->heure_livraison }}</p>
                 <p><strong>Nombre de personnes :</strong> {{ $commande->nombre_personne }}</p>
-                <p><strong>Prix menus :</strong> {{ number_format($commande->prix_menu, 2, ',', ' ') }} €</p>
+                <p><strong>Prix menus :</strong> {{ number_format($prixMenusTotal, 2, ',', ' ') }} €</p>
                 <p><strong>Prix livraison :</strong> {{ number_format($commande->prix_livraison, 2, ',', ' ') }} €</p>
-                <p><strong>Total :</strong> {{ number_format($commande->prix_menu + $commande->prix_livraison, 2, ',', ' ') }} €</p>
+                <p><strong>Total :</strong> {{ number_format($prixMenusTotal + $commande->prix_livraison, 2, ',', ' ') }} €</p>
                 <p><strong>Prêt matériel :</strong> {{ $commande->pret_materiel ? 'Oui' : 'Non' }}</p>
                 <p><strong>Matériel restitué :</strong> {{ $commande->restitution_materiel ? 'Oui' : 'Non' }}</p>
                 <p><strong>Statut :</strong> {{ $commande->statut }}</p>
