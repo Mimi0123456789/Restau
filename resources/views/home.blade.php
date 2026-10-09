@@ -1,4 +1,3 @@
-{{-- resources/views/home.blade.php --}}
 @extends('layouts.app')
 
 @section('title', 'Vite & Gourmand')
@@ -177,7 +176,7 @@
                                 <div class="carousel-inner h-64">
                                     @foreach($platsAvecPhoto as $index => $plat)
                                         <div class="carousel-item {{ $index === 0 ? 'active' : '' }} h-64">
-                                            <img src="{{ $plat->photo_url }}"
+                                            <img src="{{ $plat->photo }}"
                                                  class="d-block w-100 h-100 object-fit-cover"
                                                  alt="{{ $plat->titre_plat }}">
                                             <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded px-2 py-1">

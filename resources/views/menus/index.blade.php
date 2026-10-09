@@ -174,8 +174,8 @@
 
                                                                     <div>
                                                                         @if($plat->photo)
-                                                                            <a href="{{ $plat->photo_url }}" target="_blank">
-                                                                                <img src="{{ $plat->photo_url }}"
+                                                                            <a href="{{ $plat->photo }}" target="_blank">
+                                                                                <img src="{{ $plat->photo }}"
                                                                                      alt="{{ $plat->titre_plat }}"
                                                                                      style="width:60px; height:60px; object-fit:cover;"
                                                                                      class="rounded border">
@@ -240,9 +240,9 @@
                                         <td class="fw-semibold">{{ $plat->titre_plat }}</td>
                                         <td>
                                             @if($plat->photo)
-                                                <a href="{{ $plat->photo_url }}" target="_blank">
+                                                <a href="{{ $plat->photo }}" target="_blank">
                                                     <img
-                                                        src="{{ $plat->photo_url }}"
+                                                        src="{{ $plat->photo }}"
                                                         alt="{{ $plat->titre_plat }}"
                                                         style="width:60px;height:60px;object-fit:cover"
                                                         class="rounded border shadow-sm">
