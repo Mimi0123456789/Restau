@@ -50,7 +50,6 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Nombre de personnes</label>
                     <input
                         type="number"
                         id="nombre_personne"
