@@ -49,6 +49,20 @@
                     >
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label">Nombre de personnes</label>
+                    <input
+                        type="number"
+                        id="nombre_personne"
+                        class="form-control"
+                        value="{{ old('nombre_personne', $commande->nombre_personne) }}"
+                        readonly
+                        hidden
+                    >
+                    <input type="hidden" name="nombre_personne" value="{{ old('nombre_personne', $commande->nombre_personne) }}">
+                </div>
+
+                @foreach($commande->menus as $menu)
                     <div class="mb-3">
                         <label class="form-label">Nombre de personnes</label>
                         <input
@@ -60,6 +74,7 @@
                             required
                         >
                     </div>
+                @endforeach
 
                 <div class="form-check mb-2">
                     <input
