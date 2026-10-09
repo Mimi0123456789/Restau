@@ -325,7 +325,7 @@ Les statistiques administrateur permettent :
 * le nombre de commandes par menu ;
 * l’affichage graphique des données.
 
-MongoDB est utilisé pour cette partie analytique.
+Un filtrage dynamique est possible.
 
 ---
 
@@ -377,10 +377,8 @@ Améliorations possibles :
 * paiement en ligne ;
 * génération de factures PDF ;
 * notifications temps réel ;
-* suivi des stocks ;
 * application mobile ;
-* optimisation RGAA ;
-* dashboard statistiques avancé.
+* optimisation RGAA.
 
 ---
 
