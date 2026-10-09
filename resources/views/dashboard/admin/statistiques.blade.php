@@ -34,15 +34,48 @@
             <div class="card-body">
                 <form method="GET" action="{{ route('admin.statistiques') }}" class="row g-3 align-items-end">
                     <div class="col-md-4">
-                        <label for="menu_ids" class="form-label">Filtrer par menus</label>
-                        <select name="menu_ids[]" id="menu_ids" class="form-select" multiple size="6">
-                            @foreach($menus as $menu)
-                                <option value="{{ $menu->id }}" @selected(in_array($menu->id, $menuIds ?? [], true))>
-                                    {{ $menu->titre }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <small class="text-muted">Maintenez Ctrl/Cmd pour sélectionner plusieurs menus.</small>
+                        <label class="form-label">Filtrer par menus</label>
+                        <div class="dropdown menu-dropdown">
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center"
+                                id="menuDropdownToggle"
+                                aria-expanded="false"
+                            >
+                                <span id="menuDropdownLabel">Sélectionner des menus</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+
+                            <div class="dropdown-menu w-100 shadow-sm border-0 mt-2 p-2" id="menuDropdownMenu" style="max-height: 260px; overflow-y: auto;">
+                                <input
+                                    type="text"
+                                    id="menu_search"
+                                    class="form-control form-control-sm mb-2"
+                                    placeholder="Rechercher un menu"
+                                >
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="menu_all" {{ empty($menuIds) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="menu_all">Tous les menus</label>
+                                </div>
+
+                                @foreach($menus as $menu)
+                                    <div class="form-check mb-2 menu-item" data-menu-name="{{ strtolower($menu->titre) }}">
+                                        <input
+                                            class="form-check-input menu-checkbox"
+                                            type="checkbox"
+                                            name="menu_ids[]"
+                                            value="{{ $menu->id }}"
+                                            id="menu_{{ $menu->id }}"
+                                            @checked(in_array($menu->id, $menuIds ?? [], true))
+                                        >
+                                        <label class="form-check-label" for="menu_{{ $menu->id }}">
+                                            {{ $menu->titre }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-md-3">
@@ -215,6 +248,80 @@
 
     const dailyRevenueLabels = @json($dailyRevenueLabels);
     const dailyRevenueData = @json($dailyRevenueData);
+
+    const menuAllCheckbox = document.getElementById('menu_all');
+    const menuCheckboxes = document.querySelectorAll('.menu-checkbox');
+    const menuSearchInput = document.getElementById('menu_search');
+    const menuItems = document.querySelectorAll('.menu-item');
+    const menuDropdownToggle = document.getElementById('menuDropdownToggle');
+    const menuDropdownMenu = document.getElementById('menuDropdownMenu');
+    const menuDropdownLabel = document.getElementById('menuDropdownLabel');
+
+    const updateMenuDropdownLabel = () => {
+        const checked = Array.from(menuCheckboxes).filter(item => item.checked);
+
+        if (checked.length === 0) {
+            menuDropdownLabel.textContent = 'Tous les menus';
+            return;
+        }
+
+        if (checked.length === 1) {
+            const item = checked[0].closest('.menu-item');
+            const label = item ? item.textContent.trim() : '1 menu sélectionné';
+            menuDropdownLabel.textContent = label;
+            return;
+        }
+
+        menuDropdownLabel.textContent = `${checked.length} menus sélectionnés`;
+    };
+
+    if (menuDropdownToggle && menuDropdownMenu) {
+        menuDropdownToggle.addEventListener('click', function () {
+            const isOpen = menuDropdownMenu.classList.contains('show');
+            menuDropdownMenu.classList.toggle('show', !isOpen);
+            menuDropdownToggle.setAttribute('aria-expanded', String(!isOpen));
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('.menu-dropdown')) {
+                menuDropdownMenu.classList.remove('show');
+                menuDropdownToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    if (menuAllCheckbox) {
+        menuAllCheckbox.addEventListener('change', function () {
+            menuCheckboxes.forEach(checkbox => {
+                checkbox.checked = !this.checked;
+            });
+            updateMenuDropdownLabel();
+        });
+    }
+
+    menuCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            if (menuAllCheckbox) {
+                const anyChecked = Array.from(menuCheckboxes).some(item => item.checked);
+                menuAllCheckbox.checked = !anyChecked;
+            }
+            updateMenuDropdownLabel();
+        });
+    });
+
+    if (menuSearchInput) {
+        menuSearchInput.addEventListener('input', function () {
+            const search = this.value.trim().toLowerCase();
+
+            menuItems.forEach(item => {
+                const name = item.dataset.menuName || '';
+                const visible = !search || name.includes(search);
+                item.style.display = visible ? '' : 'none';
+            });
+        });
+    }
+
+    updateMenuDropdownLabel();
 
     new ApexCharts(document.querySelector('#dailyRevenueChart'), {
         chart: {
