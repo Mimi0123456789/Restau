@@ -14,6 +14,7 @@ class HomeController extends Controller
     {
         $menus = Menu::with(['theme', 'regime', 'plats'])
             ->where('quantite_restante', '>', 0)
+            ->whereColumn('quantite_restante', '>=', 'nombre_personne_minimum')
             ->when($request->filled('theme_id'), function ($query) use ($request) {
                 $query->where('theme_id', $request->theme_id);
             })

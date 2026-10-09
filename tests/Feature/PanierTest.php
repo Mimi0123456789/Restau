@@ -176,6 +176,54 @@ class PanierTest extends TestCase
         ]);
     }
 
+    public function test_un_menu_sous_les_quantites_minimums_n_est_pas_affiche_dans_la_home(): void
+    {
+        $menu = Menu::create([
+            'titre' => 'Menu non visible',
+            'nombre_personne_minimum' => 4,
+            'prix_par_personne' => 25,
+            'regime_id' => $this->menu->regime_id,
+            'theme_id' => $this->menu->theme_id,
+            'description' => 'Menu insuffisant pour affichage.',
+            'quantite_restante' => 3,
+        ]);
+
+        $response = $this
+            ->actingAs($this->client)
+            ->get(route('home'));
+
+        $response->assertDontSeeText($menu->titre);
+    }
+
+    public function test_annuler_une_commande_reinjecte_les_quantites_de_menus(): void
+    {
+        $this->menu->update(['quantite_restante' => 8]);
+
+        $commande = \App\Models\Commande::create([
+            'user_id' => $this->client->id,
+            'date_commande' => now()->toDateString(),
+            'date_prestation' => now()->addDay()->toDateString(),
+            'heure_livraison' => '19:30',
+            'prix_menu' => 40,
+            'nombre_personne' => 2,
+            'prix_livraison' => 0,
+            'statut' => 'En attente',
+        ]);
+
+        $commande->menus()->attach($this->menu->id, [
+            'quantite' => 2,
+            'prix_unitaire' => 20,
+            'prix_total' => 40,
+        ]);
+
+        $this->actingAs($this->client)
+            ->patch(route('client.commandes.cancel', $commande));
+
+        $this->menu->refresh();
+
+        $this->assertSame(10, $this->menu->quantite_restante);
+    }
+
     public function test_panier_vide_ne_permet_pas_acces_validation(): void
     {
         $response = $this

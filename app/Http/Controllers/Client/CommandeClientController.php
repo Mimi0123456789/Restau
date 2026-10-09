@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\ConfirmationCommandeMail;
 use App\Models\Commande;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 
@@ -98,13 +99,23 @@ class CommandeClientController extends Controller
                 ]);
         }
 
-        $commande->update([
-            'statut' => 'Annulée',
-        ]);
+        DB::transaction(function () use ($commande) {
+            $commande->update([
+                'statut' => 'Annulée',
+            ]);
 
-        $commande->statuts()->create([
-            'statut' => 'Annulée',
-        ]);
+            foreach ($commande->menus as $menu) {
+                $quantite = (int) ($menu->pivot->quantite ?? 0);
+
+                if ($quantite > 0) {
+                    $menu->increment('quantite_restante', $quantite);
+                }
+            }
+
+            $commande->statuts()->create([
+                'statut' => 'Annulée',
+            ]);
+        });
 
         return redirect()
             ->route('client.commandes.index')
