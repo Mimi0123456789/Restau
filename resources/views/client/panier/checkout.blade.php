@@ -99,20 +99,20 @@
                         >
                     </div>
 
+                    @php
+                        $totalQuantitePanier = array_sum(array_map(fn ($item) => (int) ($item['quantite'] ?? 0), $panier));
+                    @endphp
+
                     <div class="mb-3">
                         <label class="form-label">Nombre de personnes</label>
                         <input
                             type="number"
                             id="nombre_personne"
-                            name="nombre_personne"
                             class="form-control"
-                            value="{{ old('nombre_personne', $nombrePersonneMinimum) }}"
-                            min="{{ $nombrePersonneMinimum }}"
+                            value="{{ $totalQuantitePanier }}"
                             disabled
                         >
-                        <small class="text-muted">
-                            Minimum requis : {{ $nombrePersonneMinimum }} personne(s)
-                        </small>
+                        <input type="hidden" name="nombre_personne" value="{{ $totalQuantitePanier }}">
                     </div>
 
                     <div class="mb-3">
