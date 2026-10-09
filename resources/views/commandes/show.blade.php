@@ -3,6 +3,9 @@
 @section('content')
     @php
         $prixMenusTotal = $commande->menus->sum(fn ($menu) => (float) ($menu->pivot->prix_total ?? 0));
+        $prixUnitaireMenu = $commande->menus->isNotEmpty()
+            ? (float) ($commande->menus->first()->pivot->prix_unitaire ?? 0)
+            : 0;
     @endphp
 
     <div class="container pt-24">
@@ -47,7 +50,7 @@
                         <p><strong>Date prestation :</strong> {{ $commande->date_prestation?->format('d/m/Y') }}</p>
                         <p><strong>Heure livraison :</strong> {{ $commande->heure_livraison }}</p>
                         <p disabled><strong>Nombre de personnes :</strong> {{ $commande->nombre_personne }}</p>
-                        <p><strong>Prix menus :</strong> {{ number_format($prixMenusTotal, 2, ',', ' ') }} €</p>
+                        <p><strong>Prix du menu :</strong> {{ number_format($prixUnitaireMenu, 2, ',', ' ') }} €</p>
                         <p><strong>Prix livraison :</strong> {{ number_format($commande->prix_livraison, 2, ',', ' ') }} €</p>
                         <p><strong>Total :</strong> {{ number_format($prixMenusTotal + $commande->prix_livraison, 2, ',', ' ') }} €</p>
                         <p><strong>Prêt matériel :</strong> {{ $commande->pret_materiel ? 'Oui' : 'Non' }}</p>
