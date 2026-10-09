@@ -13,6 +13,7 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $menus = Menu::with(['theme', 'regime', 'plats'])
+            ->where('quantite_restante', '>', 0)
             ->when($request->filled('theme_id'), function ($query) use ($request) {
                 $query->where('theme_id', $request->theme_id);
             })
@@ -31,7 +32,7 @@ class HomeController extends Controller
         $avis = Avis::with(['commande.user'])
             ->where('statut', 'valide')
             ->orderByDesc('created_at')
-            ->limit(20)
+            ->limit(6)
             ->get();
 
         return view('home', compact('menus', 'themes', 'regimes', 'avis'));

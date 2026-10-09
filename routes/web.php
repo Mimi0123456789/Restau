@@ -32,34 +32,7 @@ use App\Http\Controllers\Dashboard\ClientDashboardController;
 | Page d'accueil
 |--------------------------------------------------------------------------
 */
-Route::get('/', function (Request $request) {
-    $query = Menu::with(['theme', 'regime', 'plats'])
-        ->where('quantite_restante', '>', 0);
-
-    if ($request->filled('theme_id')) {
-        $query->where('theme_id', $request->theme_id);
-    }
-
-    if ($request->filled('regime_id')) {
-        $query->where('regime_id', $request->regime_id);
-    }
-
-    if ($request->filled('prix_max')) {
-        $query->where('prix_par_personne', '<=', $request->prix_max);
-    }
-
-    $menus = $query->orderBy('prix_par_personne')->get();
-    $themes = Theme::orderBy('libelle')->get();
-    $regimes = Regime::orderBy('libelle')->get();
-
-    $avis = Avis::with('commande.user')
-        ->where('statut', 'valide')
-        ->latest()
-        ->take(20)
-        ->get();
-
-    return view('home', compact('menus', 'themes', 'regimes', 'avis'));
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/contact', [ContactController::class, 'create'])->name('contact.create');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');

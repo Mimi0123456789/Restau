@@ -26,17 +26,17 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-2">
-                                <form method="POST" action="{{ route('panier.update', $menu) }}" class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <form method="POST" action="{{ route('panier.update', $menu) }}" class="quantity-form flex items-center gap-2">
                                     @csrf
                                     @method('PATCH')
                                     <input type="number"
                                            name="quantite"
                                            value="{{ $panier[$menu->id]['quantite'] ?? 1 }}"
-                                           min="1"
-                                           class="form-control"
-                                           style="width:90px;">
-                                    <button class="btn btn-outline-secondary btn-sm">Maj</button>
+                                           min="{{ $menu->nombre_personne_minimum }}"
+                                           data-min="{{ $menu->nombre_personne_minimum }}"
+                                           class="quantity-input form-control"
+                                           style="width:100px;">
                                 </form>
 
                                 <form method="POST" action="{{ route('panier.remove', $menu) }}">
@@ -45,6 +45,8 @@
                                     <button class="btn btn-outline-danger btn-sm">Retirer</button>
                                 </form>
                             </div>
+
+                            <div class="quantity-error text-danger text-sm w-full" data-menu="{{ $menu->id }}" hidden></div>
                         </div>
                     @endforeach
                 </div>
@@ -57,10 +59,64 @@
             </div>
 
             <div class="text-end">
-                <a href="{{ route('panier.checkout.form') }}" class="btn btn-primary">
+                <a href="{{ route('panier.checkout.form') }}" class="btn btn-primary" id="continue-order-button">
                     Continuer la commande
                 </a>
             </div>
         @endif
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    function validateQuantities() {
+        const forms = document.querySelectorAll('.quantity-form');
+        const continueButton = document.getElementById('continue-order-button');
+        let isValid = true;
+
+        forms.forEach(form => {
+            const input = form.querySelector('.quantity-input');
+            const errorBlock = form.closest('.border')?.querySelector('.quantity-error');
+            const minimum = Number(input.dataset.min || 1);
+            const value = Number(input.value || 0);
+
+            if (value < minimum) {
+                isValid = false;
+                if (errorBlock) {
+                    errorBlock.textContent = `La quantité minimum pour ce menu est de ${minimum} personne(s).`;
+                    errorBlock.hidden = false;
+                }
+                input.classList.add('is-invalid');
+            } else {
+                if (errorBlock) {
+                    errorBlock.textContent = '';
+                    errorBlock.hidden = true;
+                }
+                input.classList.remove('is-invalid');
+            }
+        });
+
+        if (continueButton) {
+            continueButton.disabled = !isValid;
+            continueButton.classList.toggle('opacity-50', !isValid);
+            continueButton.classList.toggle('pointer-events-none', !isValid);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            input.addEventListener('input', validateQuantities);
+            input.addEventListener('change', function () {
+                const form = this.closest('form');
+                const minimum = Number(this.dataset.min || 1);
+
+                if (Number(this.value || 0) >= minimum) {
+                    form.submit();
+                }
+            });
+        });
+
+        validateQuantities();
+    });
+</script>
+@endpush

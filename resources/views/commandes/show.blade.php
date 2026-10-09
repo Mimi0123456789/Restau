@@ -42,7 +42,7 @@
                         <p><strong>Date commande :</strong> {{ $commande->date_commande?->format('d/m/Y') }}</p>
                         <p><strong>Date prestation :</strong> {{ $commande->date_prestation?->format('d/m/Y') }}</p>
                         <p><strong>Heure livraison :</strong> {{ $commande->heure_livraison }}</p>
-                        <p><strong>Nombre de personnes :</strong> {{ $commande->nombre_personne }}</p>
+                        <p disabled><strong>Nombre de personnes :</strong> {{ $commande->nombre_personne }}</p>
                         <p><strong>Prix menus :</strong> {{ number_format($commande->prix_menu, 2, ',', ' ') }} €</p>
                         <p><strong>Prix livraison :</strong> {{ number_format($commande->prix_livraison, 2, ',', ' ') }} €</p>
                         <p><strong>Total :</strong> {{ number_format($commande->prix_menu + $commande->prix_livraison, 2, ',', ' ') }} €</p>

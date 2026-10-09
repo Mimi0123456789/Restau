@@ -32,10 +32,23 @@ class PanierController extends Controller
 
     public function add(Menu $menu)
     {
+        if ($menu->quantite_restante <= 0) {
+            return redirect()->back()->withErrors([
+                'panier' => 'Ce menu n\'est plus disponible.',
+            ]);
+        }
+
         $panier = session()->get('panier', []);
+        $nouvelleQuantite = ($panier[$menu->id]['quantite'] ?? 0) + 1;
+
+        if ($nouvelleQuantite > $menu->quantite_restante) {
+            return redirect()->back()->withErrors([
+                'panier' => "Il ne reste que {$menu->quantite_restante} exemplaire(s) de ce menu.",
+            ]);
+        }
 
         if (isset($panier[$menu->id])) {
-            $panier[$menu->id]['quantite']++;
+            $panier[$menu->id]['quantite'] = $nouvelleQuantite;
         } else {
             $panier[$menu->id] = [
                 'quantite' => 1,
@@ -52,6 +65,18 @@ class PanierController extends Controller
         $validated = $request->validate([
             'quantite' => 'required|integer|min:1',
         ]);
+
+        if ($validated['quantite'] < $menu->nombre_personne_minimum) {
+            return redirect()->route('panier.index')->withErrors([
+                'panier' => "La quantité doit être d'au moins {$menu->nombre_personne_minimum} pour ce menu.",
+            ]);
+        }
+
+        if ($validated['quantite'] > $menu->quantite_restante) {
+            return redirect()->route('panier.index')->withErrors([
+                'panier' => "Il ne reste que {$menu->quantite_restante} exemplaire(s) de ce menu.",
+            ]);
+        }
 
         $panier = session()->get('panier', []);
 
@@ -116,6 +141,22 @@ class PanierController extends Controller
             ]);
         }
 
+        foreach ($menus as $menu) {
+            $quantite = $panier[$menu->id]['quantite'] ?? 1;
+
+            if ($quantite < $menu->nombre_personne_minimum) {
+                return redirect()->route('panier.index')->withErrors([
+                    'panier' => "La quantité du menu \"{$menu->titre}\" doit être d'au moins {$menu->nombre_personne_minimum}.",
+                ]);
+            }
+
+            if ($menu->quantite_restante < $quantite) {
+                return redirect()->route('panier.index')->withErrors([
+                    'panier' => "Le menu \"{$menu->titre}\" n'est plus disponible en quantité suffisante. Il reste {$menu->quantite_restante} exemplaire(s).",
+                ]);
+            }
+        }
+
         $nombrePersonneMinimum = max($menus->pluck('nombre_personne_minimum')->toArray());
 
         $validated = $request->validate([
@@ -137,14 +178,14 @@ class PanierController extends Controller
         foreach ($menus as $menu) {
             $quantite = $panier[$menu->id]['quantite'] ?? 1;
 
-            $prixUnitaire = $menu->prix_par_personne * $validated['nombre_personne'];
+            $prixUnitaire = round($menu->prix_par_personne * $validated['nombre_personne'], 2);
 
             if ($validated['nombre_personne'] >= ($menu->nombre_personne_minimum + 5)) {
                 $prixUnitaire = round($prixUnitaire * 0.90, 2);
             }
 
-            $prixTotal = $prixUnitaire * $quantite;
-            $totalMenus += $prixTotal;
+            $prixTotal = round($prixUnitaire * $quantite, 2);
+            $totalMenus = round($totalMenus + $prixTotal, 2);
 
             $syncData[$menu->id] = [
                 'quantite' => $quantite,

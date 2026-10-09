@@ -108,7 +108,7 @@
                             class="form-control"
                             value="{{ old('nombre_personne', $nombrePersonneMinimum) }}"
                             min="{{ $nombrePersonneMinimum }}"
-                            required
+                            disabled
                         >
                         <small class="text-muted">
                             Minimum requis : {{ $nombrePersonneMinimum }} personne(s)
@@ -159,16 +159,16 @@
             const quantite = parseInt(ligne.dataset.qty || 1, 10);
             const minimum = parseInt(ligne.dataset.min || 1, 10);
 
-            let prixUnitaire = prixParPersonne * nombrePersonne;
+            let prixUnitaire = prixParPersonne;
 
             if (nombrePersonne >= (minimum + 5)) {
-                prixUnitaire = prixUnitaire * 0.9;
+                prixUnitaire = Number((prixUnitaire * 0.9).toFixed(2));
             }
 
-            total += prixUnitaire * quantite;
+            total = Number((total + (prixUnitaire * quantite)).toFixed(2));
         });
 
-        total += prixLivraison;
+        total = Number((total + prixLivraison).toFixed(2));
 
         document.getElementById('total-estime').textContent =
             total.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

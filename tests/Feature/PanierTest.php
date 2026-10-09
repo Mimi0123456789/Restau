@@ -112,6 +112,28 @@ class PanierTest extends TestCase
         $response->assertSessionHasErrors('quantite');
     }
 
+    public function test_une_commande_ne_peut_pas_depasser_le_stock_disponible(): void
+    {
+        $this->menu->update(['quantite_restante' => 1]);
+
+        $response = $this
+            ->actingAs($this->client)
+            ->withSession([
+                'panier' => [
+                    $this->menu->id => [
+                        'quantite' => 2,
+                    ],
+                ],
+            ])
+            ->post(route('panier.checkout'), [
+                'date_prestation' => now()->toDateString(),
+                'heure_livraison' => '19:30',
+                'nombre_personne' => 2,
+            ]);
+
+        $response->assertSessionHasErrors('panier');
+    }
+
     public function test_client_peut_supprimer_menu_du_panier(): void
     {
         $response = $this
