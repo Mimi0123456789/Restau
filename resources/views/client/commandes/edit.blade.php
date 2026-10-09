@@ -53,12 +53,13 @@
                     <label class="form-label">Nombre de personnes</label>
                     <input
                         type="number"
-                        name="nombre_personne"
+                        id="nombre_personne"
                         class="form-control"
                         value="{{ old('nombre_personne', $commande->nombre_personne) }}"
-                        min="1"
-                        required
+                        readonly
+                        disabled
                     >
+                    <input type="hidden" name="nombre_personne" value="{{ old('nombre_personne', $commande->nombre_personne) }}">
                 </div>
 
                 @foreach($commande->menus as $menu)
@@ -111,4 +112,33 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const totalInput = document.getElementById('nombre_personne');
+            if (!totalInput) return;
+
+            const updateTotal = () => {
+                const inputs = document.querySelectorAll('input[name^="quantites["]');
+                let total = 0;
+
+                inputs.forEach(input => {
+                    const value = parseInt(input.value || 0, 10);
+                    if (!Number.isNaN(value)) {
+                        total += value;
+                    }
+                });
+
+                totalInput.value = total;
+                const hidden = document.querySelector('input[name="nombre_personne"]');
+                if (hidden) hidden.value = total;
+            };
+
+            document.querySelectorAll('input[name^="quantites["]').forEach(input => {
+                input.addEventListener('input', updateTotal);
+            });
+
+            updateTotal();
+        });
+    </script>
 @endsection

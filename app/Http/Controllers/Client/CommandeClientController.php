@@ -61,7 +61,6 @@ class CommandeClientController extends Controller
         $validated = $request->validate([
             'date_prestation' => ['required', 'date', 'after_or_equal:today'],
             'heure_livraison' => ['required', 'date_format:H:i'],
-            'nombre_personne' => ['required', 'integer', 'min:1'],
             'quantites' => ['nullable', 'array'],
             'quantites.*' => ['required', 'integer', 'min:1'],
             'pret_materiel' => ['nullable', 'boolean'],
@@ -95,7 +94,9 @@ class CommandeClientController extends Controller
             }
         }
 
-        DB::transaction(function () use ($commande, $request, $validated, $quantites) {
+        $totalQuantiteCommande = array_sum(array_values($quantites));
+
+        DB::transaction(function () use ($commande, $request, $validated, $quantites, $totalQuantiteCommande) {
             $syncData = [];
             $totalMenus = 0;
 
@@ -111,9 +112,9 @@ class CommandeClientController extends Controller
                     $menu->increment('quantite_restante', abs($difference));
                 }
 
-                $prixUnitaire = round($menu->prix_par_personne * $validated['nombre_personne'], 2);
+                $prixUnitaire = round($menu->prix_par_personne, 2);
 
-                if ($validated['nombre_personne'] >= ($menu->nombre_personne_minimum + 5)) {
+                if ($totalQuantiteCommande >= ($menu->nombre_personne_minimum + 5)) {
                     $prixUnitaire = round($prixUnitaire * 0.90, 2);
                 }
 
@@ -130,7 +131,7 @@ class CommandeClientController extends Controller
             $commande->update([
                 'date_prestation' => $validated['date_prestation'],
                 'heure_livraison' => $validated['heure_livraison'] . ':00',
-                'nombre_personne' => $validated['nombre_personne'],
+                'nombre_personne' => $totalQuantiteCommande,
                 'prix_menu' => $totalMenus,
                 'pret_materiel' => $request->boolean('pret_materiel'),
                 'restitution_materiel' => $request->boolean('restitution_materiel'),

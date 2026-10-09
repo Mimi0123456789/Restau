@@ -158,16 +158,17 @@ class PanierController extends Controller
         }
 
         $nombrePersonneMinimum = max($menus->pluck('nombre_personne_minimum')->toArray());
+        $totalQuantitePanier = array_sum(array_map(fn ($item) => (int) ($item['quantite'] ?? 0), $panier));
 
         $validated = $request->validate([
             'date_prestation' => 'required|date|after_or_equal:today',
             'heure_livraison' => 'required|date_format:H:i',
-            'nombre_personne' => 'required|integer|min:' . $nombrePersonneMinimum,
+            'nombre_personne' => 'required|integer|min:1',
             'pret_materiel' => 'nullable|boolean',
             'restitution_materiel' => 'nullable|boolean',
-        ], [
-            'nombre_personne.min' => "Le nombre de personnes doit être d'au moins {$nombrePersonneMinimum}.",
         ]);
+
+        $validated['nombre_personne'] = $totalQuantitePanier;
 
         $user = auth()->user();
         $prixLivraison = $this->calculPrixLivraison($user);
@@ -180,7 +181,7 @@ class PanierController extends Controller
 
             $prixUnitaire = round($menu->prix_par_personne, 2);
 
-            if ($validated['nombre_personne'] >= ($menu->nombre_personne_minimum + 5)) {
+            if ($totalQuantitePanier >= ($menu->nombre_personne_minimum + 5)) {
                 $prixUnitaire = round($prixUnitaire * 0.90, 2);
             }
 
