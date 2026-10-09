@@ -6,7 +6,7 @@
     @php
         $prixMenusTotal = $commande->menus->sum(fn ($menu) => (float) ($menu->pivot->prix_total ?? 0));
         $prixUnitaireMenu = $commande->menus->isNotEmpty()
-            ? (float) ($commande->menus->first()->pivot->prix_unitaire ?? 0)
+            ? (float) ($commande->menus->first()->prix_par_personne ?? 0)
             : 0;
     @endphp
 
@@ -98,7 +98,7 @@
                             <div class="text-sm text-gray-600 mt-1">
                                 Quantité : {{ $menu->pivot->quantite }} |
                                 Prix unitaire :
-                                {{ number_format($menu->pivot->prix_unitaire, 2, ',', ' ') }} € |
+                                {{ number_format($menu->prix_par_personne, 2, ',', ' ') }} € |
                                 Total :
                                 {{ number_format($menu->pivot->prix_total, 2, ',', ' ') }} €
                             </div>
