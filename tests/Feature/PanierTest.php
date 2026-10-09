@@ -154,6 +154,28 @@ class PanierTest extends TestCase
         );
     }
 
+    public function test_le_prix_menu_n_est_pas_multiplie_deux_fois(): void
+    {
+        $this->actingAs($this->client)
+            ->withSession([
+                'panier' => [
+                    $this->menu->id => [
+                        'quantite' => 2,
+                    ],
+                ],
+            ])
+            ->post(route('panier.checkout'), [
+                'date_prestation' => now()->toDateString(),
+                'heure_livraison' => '19:30',
+                'nombre_personne' => 2,
+            ]);
+
+        $this->assertDatabaseHas('commandes', [
+            'user_id' => $this->client->id,
+            'prix_menu' => 40.0,
+        ]);
+    }
+
     public function test_panier_vide_ne_permet_pas_acces_validation(): void
     {
         $response = $this
